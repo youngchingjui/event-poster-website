@@ -5,13 +5,16 @@ import { Download, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface DownloadButtonProps {
+  city?: string
   eventName?: string
   tagline?: string
   date?: string
   time?: string
   venue?: string
   location?: string
-  ticketInfo?: string
+  qrCodeSrc?: string
+  showQr?: boolean
+  backgroundImageSrc?: string
 }
 
 export function DownloadButton(props: DownloadButtonProps) {

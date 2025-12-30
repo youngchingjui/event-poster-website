@@ -3,13 +3,16 @@
 import { EventPoster } from "./event-poster"
 
 interface PosterPreviewProps {
+  city?: string
   eventName?: string
   tagline?: string
   date?: string
   time?: string
   venue?: string
   location?: string
-  ticketInfo?: string
+  qrCodeSrc?: string
+  showQr?: boolean
+  backgroundImageSrc?: string
 }
 
 export function PosterPreview(props: PosterPreviewProps) {

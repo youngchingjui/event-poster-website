@@ -1,145 +1,155 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { CalendarDays, MapPin, Clock, Ticket } from "lucide-react"
+import { useMemo, useState } from "react"
 
 interface EventPosterProps {
+  city?: string
   eventName?: string
   tagline?: string
   date?: string
   time?: string
   venue?: string
   location?: string
-  ticketInfo?: string
+  qrCodeSrc?: string
+  showQr?: boolean
+  backgroundImageSrc?: string
 }
 
 export function EventPoster({
-  eventName = "NEON NIGHTS",
-  tagline = "An Immersive Electronic Music Experience",
-  date = "MARCH 15, 2025",
-  time = "8:00 PM — 2:00 AM",
-  venue = "THE WAREHOUSE",
-  location = "Brooklyn, New York",
-  ticketInfo = "Early Bird $45 • General $65",
+  city = "Shanghai",
+  eventName = "AI Breakfast #21",
+  tagline = "AI workflows • 2025 reflections • 2026 predictions",
+  date = "Thursday, Jan 1",
+  time = "9:00 – 10:30 AM",
+  venue = "BAKER&SPICE",
+  location = "1717 West Nanjing Road, Wheelock Square\n南京西路1717号 会德丰国际广场南院首层101号商铺\n(Look for long table in the back)",
+  qrCodeSrc = "/23.png",
+  showQr = true,
+  backgroundImageSrc = "/luisa-fournier-hMjyyBqCRIs-unsplash.jpg",
 }: EventPosterProps) {
-  // Generate decorative lines only on client side to avoid hydration mismatch
-  const [decorativeLines, setDecorativeLines] = useState<
-    Array<{ width: number; left: number; rotation: number }>
-  >([])
+  const locationLines = useMemo(() => (location ?? "").split("\n").filter(Boolean), [location])
 
-  useEffect(() => {
-    setDecorativeLines(
-      Array.from({ length: 20 }).map(() => ({
-        width: Math.random() * 300 + 100,
-        left: Math.random() * 100,
-        rotation: Math.random() * 30 - 15,
-      }))
-    )
-  }, [])
+  const [imageSrc, setImageSrc] = useState(backgroundImageSrc)
 
   return (
     <div
       id="event-poster"
-      className="relative w-[1080px] h-[1920px] bg-background overflow-hidden flex flex-col"
-      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+      className="relative w-[1080px] h-[1920px] overflow-hidden"
+      style={{
+        backgroundColor: "#F6EBDC",
+      }}
     >
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-full h-full">
-          {decorativeLines.map((line, i) => (
-            <div
-              key={i}
-              className="absolute bg-primary/30"
-              style={{
-                width: `${line.width}px`,
-                height: "1px",
-                top: `${i * 100}px`,
-                left: `${line.left}%`,
-                transform: `rotate(${line.rotation}deg)`,
-              }}
-            />
-          ))}
-        </div>
+      {/* Photo (bottom half) */}
+      <div className="absolute inset-0">
+        <img
+          alt="Breakfast table"
+          src={imageSrc}
+          className="absolute bottom-0 left-0 w-full h-[980px] object-cover"
+          onError={() => setImageSrc("/placeholder.jpg")}
+        />
+
+        {/* Soft overlay to keep top text readable */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(246,235,220,1) 0%, rgba(246,235,220,1) 46%, rgba(246,235,220,0.65) 62%, rgba(246,235,220,0) 78%)",
+          }}
+        />
       </div>
 
-      {/* Top accent bar */}
-      <div className="h-3 bg-primary w-full" />
+      {/* Content */}
+      <div className="relative z-10 px-20 pt-20">
+        <p
+          className="text-[34px] tracking-wide"
+          style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
+        >
+          {city}
+        </p>
 
-      {/* Header section */}
-      <div className="px-16 pt-16 pb-8">
-        <p className="text-muted-foreground text-3xl tracking-[0.3em] uppercase">presents</p>
-      </div>
-
-      {/* Main title area */}
-      <div className="flex-1 flex flex-col justify-center px-16">
-        {/* Event name - massive typography */}
-        <h1 className="text-[180px] font-bold leading-[0.85] tracking-tight text-foreground">
-          {eventName.split(" ").map((word, i) => (
-            <span key={i} className="block">
-              {i === 1 ? <span className="text-primary">{word}</span> : word}
-            </span>
-          ))}
+        <h1
+          className="mt-6 text-[140px] leading-[0.95]"
+          style={{
+            color: "#C65B3C",
+            fontFamily: 'ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, serif',
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {eventName}
         </h1>
 
-        {/* Tagline */}
-        <p className="text-4xl text-muted-foreground mt-12 max-w-[700px] leading-relaxed">{tagline}</p>
+        <p
+          className="mt-14 text-[54px] leading-tight"
+          style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
+        >
+          {date} | {time}
+        </p>
 
-        {/* Decorative element */}
-        <div className="mt-16 flex items-center gap-4">
-          <div className="h-px bg-border flex-1 max-w-[200px]" />
-          <div className="w-4 h-4 bg-primary rotate-45" />
-          <div className="h-px bg-border flex-1 max-w-[200px]" />
+        <p
+          className="mt-8 max-w-[880px] text-[34px] leading-relaxed"
+          style={{ color: "#7A6B5E", fontFamily: "ui-serif, Georgia, Times, serif" }}
+        >
+          {tagline}
+        </p>
+
+        <div className="mt-16 space-y-3">
+          <p
+            className="text-[34px] tracking-wide"
+            style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
+          >
+            {venue}
+          </p>
+          {locationLines.map((line, idx) => (
+            <p
+              key={`${idx}-${line}`}
+              className="text-[30px] leading-snug"
+              style={{ color: "#7A6B5E", fontFamily: "ui-serif, Georgia, Times, serif" }}
+            >
+              {line}
+            </p>
+          ))}
         </div>
       </div>
 
-      {/* Event details */}
-      <div className="px-16 pb-20">
-        <div className="grid grid-cols-2 gap-8">
-          {/* Date & Time */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <CalendarDays className="w-10 h-10 text-primary" />
-              <div>
-                <p className="text-muted-foreground text-xl uppercase tracking-wider">Date</p>
-                <p className="text-4xl font-semibold text-foreground">{date}</p>
+      {/* QR code area */}
+      {showQr ? (
+        <div className="absolute right-20 bottom-20 z-20">
+          <div
+            className="w-[360px] h-[360px] bg-white"
+            style={{
+              border: "6px solid #7B8B76",
+              boxShadow: "0 18px 50px rgba(0,0,0,0.14)",
+            }}
+          >
+            {qrCodeSrc ? (
+              <img alt="QR code" src={qrCodeSrc} className="w-full h-full object-contain p-6" />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-8 text-center">
+                <div
+                  className="w-full flex-1 rounded-md"
+                  style={{
+                    border: "2px dashed rgba(111,98,87,0.35)",
+                    background:
+                      "radial-gradient(circle at 30% 30%, rgba(198,91,60,0.06), transparent 55%), radial-gradient(circle at 70% 70%, rgba(123,139,118,0.08), transparent 55%)",
+                  }}
+                />
+                <p
+                  className="text-[22px]"
+                  style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
+                >
+                  QR code goes here
+                </p>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Clock className="w-10 h-10 text-primary" />
-              <div>
-                <p className="text-muted-foreground text-xl uppercase tracking-wider">Time</p>
-                <p className="text-4xl font-semibold text-foreground">{time}</p>
-              </div>
-            </div>
+            )}
           </div>
-
-          {/* Venue & Location */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <MapPin className="w-10 h-10 text-primary" />
-              <div>
-                <p className="text-muted-foreground text-xl uppercase tracking-wider">Venue</p>
-                <p className="text-4xl font-semibold text-foreground">{venue}</p>
-                <p className="text-2xl text-muted-foreground">{location}</p>
-              </div>
-            </div>
-          </div>
+          <p
+            className="mt-3 text-right text-[22px]"
+            style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
+          >
+            Scan to register
+          </p>
         </div>
-
-        {/* Ticket info */}
-        <div className="mt-12 pt-12 border-t border-border">
-          <div className="flex items-center gap-4">
-            <Ticket className="w-10 h-10 text-primary" />
-            <div>
-              <p className="text-muted-foreground text-xl uppercase tracking-wider">Tickets</p>
-              <p className="text-3xl font-semibold text-foreground">{ticketInfo}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom accent bar */}
-      <div className="h-3 bg-primary w-full" />
+      ) : null}
     </div>
   )
 }
