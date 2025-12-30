@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { CalendarDays, MapPin, Clock, Ticket } from "lucide-react"
 
 interface EventPosterProps {
@@ -21,6 +22,21 @@ export function EventPoster({
   location = "Brooklyn, New York",
   ticketInfo = "Early Bird $45 • General $65",
 }: EventPosterProps) {
+  // Generate decorative lines only on client side to avoid hydration mismatch
+  const [decorativeLines, setDecorativeLines] = useState<
+    Array<{ width: number; left: number; rotation: number }>
+  >([])
+
+  useEffect(() => {
+    setDecorativeLines(
+      Array.from({ length: 20 }).map(() => ({
+        width: Math.random() * 300 + 100,
+        left: Math.random() * 100,
+        rotation: Math.random() * 30 - 15,
+      }))
+    )
+  }, [])
+
   return (
     <div
       id="event-poster"
@@ -30,16 +46,16 @@ export function EventPoster({
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-full h-full">
-          {Array.from({ length: 20 }).map((_, i) => (
+          {decorativeLines.map((line, i) => (
             <div
               key={i}
               className="absolute bg-primary/30"
               style={{
-                width: `${Math.random() * 300 + 100}px`,
+                width: `${line.width}px`,
                 height: "1px",
                 top: `${i * 100}px`,
-                left: `${Math.random() * 100}%`,
-                transform: `rotate(${Math.random() * 30 - 15}deg)`,
+                left: `${line.left}%`,
+                transform: `rotate(${line.rotation}deg)`,
               }}
             />
           ))}
