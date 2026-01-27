@@ -10,6 +10,22 @@ function getBaseUrl(request: NextRequest) {
   return `${protocol}://${host}`
 }
 
+// Helper to fetch image and convert to base64 data URL
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+
+    const contentType = response.headers.get("content-type") || "image/jpeg"
+    const arrayBuffer = await response.arrayBuffer()
+    const base64 = Buffer.from(arrayBuffer).toString("base64")
+    return `data:${contentType};base64,${base64}`
+  } catch (error) {
+    console.error(`Failed to fetch image ${url}:`, error)
+    return null
+  }
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -35,18 +51,15 @@ export async function GET(request: NextRequest) {
   const width = 1080
   const height = 1920
 
-  // Load Source Serif Pro for better serif rendering
-  let serifFontData: ArrayBuffer | undefined
-  try {
-    const fontResponse = await fetch(
-      "https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf"
-    )
-    if (fontResponse.ok) {
-      serifFontData = await fontResponse.arrayBuffer()
-    }
-  } catch {
-    console.warn("Failed to load serif font, using default")
-  }
+  // Fetch images and convert to base64 data URLs (required for Edge runtime)
+  const [backgroundImageDataUrl, qrCodeDataUrl, serifFontData] = await Promise.all([
+    fetchImageAsDataUrl(`${baseUrl}${backgroundImageSrc}`),
+    showQr ? fetchImageAsDataUrl(`${baseUrl}${qrCodeSrc}`) : Promise.resolve(null),
+    // Load Source Serif Pro for better serif rendering
+    fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
+      .then((res) => (res.ok ? res.arrayBuffer() : undefined))
+      .catch(() => undefined),
+  ])
 
   try {
     return new ImageResponse(
@@ -62,25 +75,29 @@ export async function GET(request: NextRequest) {
           }}
         >
           {/* Background image at bottom */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              width: "100%",
-              height: "980px",
-              display: "flex",
-            }}
-          >
-            <img
-              src={`${baseUrl}${backgroundImageSrc}`}
+          {backgroundImageDataUrl && (
+            <div
               style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
                 width: "100%",
-                height: "100%",
-                objectFit: "cover",
+                height: "980px",
+                display: "flex",
               }}
-            />
-          </div>
+            >
+              <img
+                src={backgroundImageDataUrl}
+                width={1080}
+                height={980}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          )}
 
           {/* Gradient overlay */}
           <div
@@ -219,14 +236,18 @@ export async function GET(request: NextRequest) {
                   padding: "24px",
                 }}
               >
-                <img
-                  src={`${baseUrl}${qrCodeSrc}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
-                />
+                {qrCodeDataUrl && (
+                  <img
+                    src={qrCodeDataUrl}
+                    width={312}
+                    height={312}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                )}
               </div>
               <p
                 style={{
