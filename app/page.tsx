@@ -172,7 +172,7 @@ export default function Home() {
             </div>
 
             <p className="text-sm text-muted-foreground text-center">
-              Downloads as a 1080×1920px PNG image (perfect for Instagram Stories)
+              Downloads as a 1080×1920px PNG image (perfect for phone viewing & WeChat)
             </p>
             <p className="text-xs text-muted-foreground text-center">
               Tip: the default background is <code className="font-mono">/luisa-fournier-hMjyyBqCRIs-unsplash.jpg</code>{" "}

@@ -23,13 +23,20 @@ export function DownloadButton(props: DownloadButtonProps) {
   const handleDownload = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/generate-poster", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(props),
-      })
+      // Build URL with search params for the OG image API
+      const params = new URLSearchParams()
+      if (props.city) params.set("city", props.city)
+      if (props.eventName) params.set("eventName", props.eventName)
+      if (props.tagline) params.set("tagline", props.tagline)
+      if (props.date) params.set("date", props.date)
+      if (props.time) params.set("time", props.time)
+      if (props.venue) params.set("venue", props.venue)
+      if (props.location) params.set("location", props.location)
+      if (props.qrCodeSrc) params.set("qrCodeSrc", props.qrCodeSrc)
+      if (props.showQr !== undefined) params.set("showQr", String(props.showQr))
+      if (props.backgroundImageSrc) params.set("backgroundImageSrc", props.backgroundImageSrc)
+
+      const response = await fetch(`/api/og-poster?${params.toString()}`)
 
       if (!response.ok) {
         throw new Error("Failed to generate poster")
