@@ -1,27 +1,36 @@
 import { ImageResponse } from "@vercel/og"
 import { NextRequest } from "next/server"
+import { readFile } from "fs/promises"
+import { join } from "path"
 
-export const runtime = "edge"
+// Use Node.js runtime to read files from filesystem
+export const runtime = "nodejs"
 
-// Helper to get base URL for fetching local images
-function getBaseUrl(request: NextRequest) {
-  const protocol = request.headers.get("x-forwarded-proto") || "https"
-  const host = request.headers.get("host") || "localhost:3000"
-  return `${protocol}://${host}`
-}
-
-// Helper to fetch image and convert to base64 data URL
-async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+// Helper to read local image and convert to base64 data URL
+async function readImageAsDataUrl(imagePath: string): Promise<string | null> {
   try {
-    const response = await fetch(url)
-    if (!response.ok) return null
+    // Remove leading slash and resolve path relative to public directory
+    const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath
+    const fullPath = join(process.cwd(), "public", cleanPath)
 
-    const contentType = response.headers.get("content-type") || "image/jpeg"
-    const arrayBuffer = await response.arrayBuffer()
-    const base64 = Buffer.from(arrayBuffer).toString("base64")
+    const buffer = await readFile(fullPath)
+
+    // Determine content type from extension
+    const ext = imagePath.split(".").pop()?.toLowerCase()
+    const contentTypeMap: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+      svg: "image/svg+xml",
+    }
+    const contentType = contentTypeMap[ext || ""] || "image/jpeg"
+
+    const base64 = buffer.toString("base64")
     return `data:${contentType};base64,${base64}`
   } catch (error) {
-    console.error(`Failed to fetch image ${url}:`, error)
+    console.error(`Failed to read image ${imagePath}:`, error)
     return null
   }
 }
@@ -45,16 +54,15 @@ export async function GET(request: NextRequest) {
   const showQr = searchParams.get("showQr") !== "false"
 
   const locationLines = location.split("\n").filter(Boolean)
-  const baseUrl = getBaseUrl(request)
 
   // Poster dimensions (optimized for phone viewing - vertical format)
   const width = 1080
   const height = 1920
 
-  // Fetch images and convert to base64 data URLs (required for Edge runtime)
+  // Read images from filesystem and convert to base64 data URLs
   const [backgroundImageDataUrl, qrCodeDataUrl, serifFontData] = await Promise.all([
-    fetchImageAsDataUrl(`${baseUrl}${backgroundImageSrc}`),
-    showQr ? fetchImageAsDataUrl(`${baseUrl}${qrCodeSrc}`) : Promise.resolve(null),
+    readImageAsDataUrl(backgroundImageSrc),
+    showQr ? readImageAsDataUrl(qrCodeSrc) : Promise.resolve(null),
     // Load Source Serif Pro for better serif rendering
     fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
@@ -254,7 +262,7 @@ export async function GET(request: NextRequest) {
                   marginTop: "12px",
                   fontSize: "22px",
                   color: "#6F6257",
-                  fontFamily: "Noto Serif SC, Georgia, serif",
+                  fontFamily: "Source Serif Pro, Georgia, serif",
                 }}
               >
                 Scan to register
