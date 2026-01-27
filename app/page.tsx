@@ -1,40 +1,75 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { PosterPreview } from "@/components/poster-preview"
 import { DownloadButton } from "@/components/download-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import type { PosterFormData } from "@/lib/persistence"
+import { getCurrentStored, getPreviousStored, saveFormData } from "@/lib/persistence"
+
+const DEFAULTS: PosterFormData = {
+  city: "Shanghai",
+  eventName: "AI Breakfast #21",
+  tagline: "AI workflows • AI 2025 reflections • 2026 predictions",
+  date: "Thursday, Jan 1",
+  time: "9:00 – 10:30 AM",
+  venue: "BAKER&SPICE",
+  location:
+    "1717 West Nanjing Road, Wheelock Square\n南京西路1717号 会德丰国际广场南院首层101号商铺\n(Look for long table in the back)",
+  backgroundImageSrc: "/luisa-fournier-hMjyyBqCRIs-unsplash.jpg",
+  qrCodeSrc: "/23.png",
+  showQr: true,
+}
+
+function loadInitial(): PosterFormData {
+  if (typeof window === "undefined") return DEFAULTS
+  const stored = getCurrentStored()
+  if (stored?.data) return { ...DEFAULTS, ...stored.data }
+  return DEFAULTS
+}
 
 export default function Home() {
-  const [city, setCity] = useState("Shanghai")
-  const [eventName, setEventName] = useState("AI Breakfast #21")
-  const [tagline, setTagline] = useState("AI workflows • AI 2025 reflections • 2026 predictions")
-  const [date, setDate] = useState("Thursday, Jan 1")
-  const [time, setTime] = useState("9:00 – 10:30 AM")
-  const [venue, setVenue] = useState("BAKER&SPICE")
-  const [location, setLocation] = useState(
-    "1717 West Nanjing Road, Wheelock Square\n南京西路1717号 会德丰国际广场南院首层101号商铺\n(Look for long table in the back)"
-  )
-  const [backgroundImageSrc, setBackgroundImageSrc] = useState("/luisa-fournier-hMjyyBqCRIs-unsplash.jpg")
-  const [qrCodeSrc, setQrCodeSrc] = useState("/23.png")
-  const [showQr, setShowQr] = useState(true)
+  const [form, setForm] = useState<PosterFormData>(() => loadInitial())
+  const [lastSavedISO, setLastSavedISO] = useState<string | null>(() => getCurrentStored()?.lastUpdated ?? null)
 
-  const posterProps = {
-    city,
-    eventName,
-    tagline,
-    date,
-    time,
-    venue,
-    location,
-    backgroundImageSrc,
-    // Allow empty string to explicitly render the placeholder (reserve space)
-    qrCodeSrc,
-    showQr,
+  // Debounced auto-save to localStorage
+  useEffect(() => {
+    const id = setTimeout(() => {
+      saveFormData(form)
+      const nowISO = new Date().toISOString()
+      setLastSavedISO(nowISO)
+    }, 350)
+    return () => clearTimeout(id)
+  }, [form])
+
+  const handleReset = () => {
+    setForm(DEFAULTS)
   }
+
+  const handleLoadPrevious = () => {
+    const prev = getPreviousStored()?.data
+    if (prev) setForm((curr) => ({ ...curr, ...prev }))
+    else alert("No previous event data found.")
+  }
+
+  const posterProps = useMemo(
+    () => ({
+      city: form.city,
+      eventName: form.eventName,
+      tagline: form.tagline,
+      date: form.date,
+      time: form.time,
+      venue: form.venue,
+      location: form.location,
+      backgroundImageSrc: form.backgroundImageSrc,
+      qrCodeSrc: form.qrCodeSrc,
+      showQr: form.showQr,
+    }),
+    [form]
+  )
 
   return (
     <main className="min-h-screen bg-background">
@@ -51,15 +86,25 @@ export default function Home() {
           {/* Editor Panel */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="text-xl font-semibold text-foreground">Customize Your Poster</h2>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-xl font-semibold text-foreground">Customize Your Poster</h2>
+                <div className="flex gap-2">
+                  <Button type="button" variant="secondary" onClick={handleLoadPrevious}>
+                    Load previous event
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={handleReset}>
+                    Reset to defaults
+                  </Button>
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
                   <Input
                     id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    value={form.city}
+                    onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                     placeholder="e.g., Shanghai"
                     className="text-base"
                   />
@@ -69,8 +114,8 @@ export default function Home() {
                   <Label htmlFor="eventName">Event Name</Label>
                   <Input
                     id="eventName"
-                    value={eventName}
-                    onChange={(e) => setEventName(e.target.value)}
+                    value={form.eventName}
+                    onChange={(e) => setForm((f) => ({ ...f, eventName: e.target.value }))}
                     placeholder="Enter event name"
                     className="text-base"
                   />
@@ -80,8 +125,8 @@ export default function Home() {
                   <Label htmlFor="tagline">Topics</Label>
                   <Input
                     id="tagline"
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
+                    value={form.tagline}
+                    onChange={(e) => setForm((f) => ({ ...f, tagline: e.target.value }))}
                     placeholder="e.g., AI workflows • 2025 reflections • 2026 predictions"
                     className="text-base"
                   />
@@ -92,8 +137,8 @@ export default function Home() {
                     <Label htmlFor="date">Date</Label>
                     <Input
                       id="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
+                      value={form.date}
+                      onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                       placeholder="e.g., MARCH 15, 2025"
                       className="text-base"
                     />
@@ -102,8 +147,8 @@ export default function Home() {
                     <Label htmlFor="time">Time</Label>
                     <Input
                       id="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
+                      value={form.time}
+                      onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
                       placeholder="e.g., 8:00 PM"
                       className="text-base"
                     />
@@ -114,8 +159,8 @@ export default function Home() {
                   <Label htmlFor="venue">Venue</Label>
                   <Input
                     id="venue"
-                    value={venue}
-                    onChange={(e) => setVenue(e.target.value)}
+                    value={form.venue}
+                    onChange={(e) => setForm((f) => ({ ...f, venue: e.target.value }))}
                     placeholder="Enter venue name"
                     className="text-base"
                   />
@@ -125,8 +170,8 @@ export default function Home() {
                   <Label htmlFor="location">Address (multiline)</Label>
                   <Textarea
                     id="location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={form.location}
+                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
                     placeholder={"Address line 1\nAddress line 2\n(Optional note)"}
                     className="text-base min-h-[120px]"
                   />
@@ -136,8 +181,8 @@ export default function Home() {
                   <Label htmlFor="backgroundImageSrc">Background image (local path)</Label>
                   <Input
                     id="backgroundImageSrc"
-                    value={backgroundImageSrc}
-                    onChange={(e) => setBackgroundImageSrc(e.target.value)}
+                    value={form.backgroundImageSrc}
+                    onChange={(e) => setForm((f) => ({ ...f, backgroundImageSrc: e.target.value }))}
                     placeholder="e.g., /ai-breakfast.jpg"
                     className="text-base"
                   />
@@ -147,27 +192,32 @@ export default function Home() {
                   <Label htmlFor="qrCodeSrc">QR code image (optional)</Label>
                   <Input
                     id="qrCodeSrc"
-                    value={qrCodeSrc}
-                    onChange={(e) => setQrCodeSrc(e.target.value)}
+                    value={form.qrCodeSrc}
+                    onChange={(e) => setForm((f) => ({ ...f, qrCodeSrc: e.target.value }))}
                     placeholder="e.g., /23.png (clear to reserve space / show placeholder)"
                     className="text-base"
                   />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-xs text-muted-foreground">
+                    {lastSavedISO ? `Auto-saved ${new Date(lastSavedISO).toLocaleString()}` : ""}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-[40px]"
+                    aria-pressed={form.showQr}
+                    onClick={() => setForm((f) => ({ ...f, showQr: !f.showQr }))}
+                  >
+                    {form.showQr ? "Hide QR code" : "Show QR code"}
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Download Button */}
             <div className="space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full min-h-[56px] text-lg font-semibold"
-                aria-pressed={showQr}
-                onClick={() => setShowQr((v) => !v)}
-              >
-                {showQr ? "Hide QR code" : "Show QR code"}
-              </Button>
               <DownloadButton {...posterProps} />
             </div>
 
@@ -192,3 +242,4 @@ export default function Home() {
     </main>
   )
 }
+
