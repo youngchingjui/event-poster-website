@@ -1,36 +1,30 @@
 import { ImageResponse } from "@vercel/og"
 import { NextRequest } from "next/server"
-import { readFile } from "fs/promises"
-import { join } from "path"
 
-// Use Node.js runtime to read files from filesystem
-export const runtime = "nodejs"
+// Use edge runtime for best performance on Vercel
+export const runtime = "edge"
 
-// Helper to read local image and convert to base64 data URL
-async function readImageAsDataUrl(imagePath: string): Promise<string | null> {
+// Helper to fetch image and convert to base64 data URL
+async function fetchImageAsDataUrl(imagePath: string, baseUrl: string): Promise<string | null> {
   try {
-    // Remove leading slash and resolve path relative to public directory
-    const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath
-    const fullPath = join(process.cwd(), "public", cleanPath)
+    // Build full URL: if it's a relative path, prepend base URL
+    // If it's already an absolute URL (e.g., Vercel Blob), use as-is
+    const imageUrl = imagePath.startsWith("http")
+      ? imagePath
+      : new URL(imagePath, baseUrl).href
 
-    const buffer = await readFile(fullPath)
-
-    // Determine content type from extension
-    const ext = imagePath.split(".").pop()?.toLowerCase()
-    const contentTypeMap: Record<string, string> = {
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
-      webp: "image/webp",
-      svg: "image/svg+xml",
+    const response = await fetch(imageUrl)
+    if (!response.ok) {
+      console.error(`Failed to fetch image ${imageUrl}: ${response.status}`)
+      return null
     }
-    const contentType = contentTypeMap[ext || ""] || "image/jpeg"
 
-    const base64 = buffer.toString("base64")
+    const contentType = response.headers.get("content-type") || "image/jpeg"
+    const arrayBuffer = await response.arrayBuffer()
+    const base64 = Buffer.from(arrayBuffer).toString("base64")
     return `data:${contentType};base64,${base64}`
   } catch (error) {
-    console.error(`Failed to read image ${imagePath}:`, error)
+    console.error(`Failed to fetch image ${imagePath}:`, error)
     return null
   }
 }
@@ -59,10 +53,13 @@ export async function GET(request: NextRequest) {
   const width = 1080
   const height = 1920
 
-  // Read images from filesystem and convert to base64 data URLs
+  // Get base URL for fetching local images
+  const baseUrl = new URL(request.url).origin
+
+  // Fetch images via URL (works on Vercel serverless)
   const [backgroundImageDataUrl, qrCodeDataUrl, serifFontData] = await Promise.all([
-    readImageAsDataUrl(backgroundImageSrc),
-    showQr ? readImageAsDataUrl(qrCodeSrc) : Promise.resolve(null),
+    fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
+    showQr ? fetchImageAsDataUrl(qrCodeSrc, baseUrl) : Promise.resolve(null),
     // Load Source Serif Pro for better serif rendering
     fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
