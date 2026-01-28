@@ -18,8 +18,9 @@ export default function Home() {
   const [location, setLocation] = useState(
     "1717 West Nanjing Road, Wheelock Square\n南京西路1717号 会德丰国际广场南院首层101号商铺\n(Look for long table in the back)"
   )
-  const [backgroundImageSrc, setBackgroundImageSrc] = useState("/luisa-fournier-hMjyyBqCRIs-unsplash.jpg")
-  const [qrCodeSrc, setQrCodeSrc] = useState("/23.png")
+  const blobBaseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || ""
+  const [backgroundImageSrc, setBackgroundImageSrc] = useState(`${blobBaseUrl}/luisa-fournier-hMjyyBqCRIs-unsplash.jpg`)
+  const [qrCodeSrc, setQrCodeSrc] = useState(`${blobBaseUrl}/23.png`)
   const [showQr, setShowQr] = useState(true)
 
   const posterProps = {

@@ -42,9 +42,10 @@ export async function GET(request: NextRequest) {
   const location =
     searchParams.get("location") ||
     "1717 West Nanjing Road, Wheelock Square\n南京西路1717号 会德丰国际广场南院首层101号商铺\n(Look for long table in the back)"
+  const blobBaseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || ""
   const backgroundImageSrc =
-    searchParams.get("backgroundImageSrc") || "/luisa-fournier-hMjyyBqCRIs-unsplash.jpg"
-  const qrCodeSrc = searchParams.get("qrCodeSrc") || "/23.png"
+    searchParams.get("backgroundImageSrc") || `${blobBaseUrl}/luisa-fournier-hMjyyBqCRIs-unsplash.jpg`
+  const qrCodeSrc = searchParams.get("qrCodeSrc") || `${blobBaseUrl}/23.png`
   const showQr = searchParams.get("showQr") !== "false"
 
   const locationLines = location.split("\n").filter(Boolean)
