@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PosterPreview } from "@/components/poster-preview";
 import { DownloadButton } from "@/components/download-button";
-import { ImagePicker } from "@/components/image-picker";
+import { ImagePicker, ImageOption } from "@/components/image-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,50 @@ export default function Home() {
   );
   const [qrCodeSrc, setQrCodeSrc] = useState(presetQRCodes[0]?.url || "");
   const [showQr, setShowQr] = useState(true);
+
+  // Track user-uploaded images
+  const [uploadedBackgrounds, setUploadedBackgrounds] = useState<ImageOption[]>([]);
+  const [uploadedQRCodes, setUploadedQRCodes] = useState<ImageOption[]>([]);
+
+  // Handlers for background uploads
+  function handleBackgroundUploaded(image: ImageOption) {
+    setUploadedBackgrounds((prev) => [...prev, image]);
+  }
+
+  function handleBackgroundNameChanged(id: string, name: string) {
+    setUploadedBackgrounds((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, name } : img))
+    );
+  }
+
+  function handleBackgroundDeleted(id: string) {
+    const imageToDelete = uploadedBackgrounds.find((img) => img.id === id);
+    setUploadedBackgrounds((prev) => prev.filter((img) => img.id !== id));
+    // If deleted image was selected, switch to first preset
+    if (imageToDelete?.url === backgroundImageSrc) {
+      setBackgroundImageSrc(presetBackgrounds[0]?.url || "");
+    }
+  }
+
+  // Handlers for QR code uploads
+  function handleQRCodeUploaded(image: ImageOption) {
+    setUploadedQRCodes((prev) => [...prev, image]);
+  }
+
+  function handleQRCodeNameChanged(id: string, name: string) {
+    setUploadedQRCodes((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, name } : img))
+    );
+  }
+
+  function handleQRCodeDeleted(id: string) {
+    const imageToDelete = uploadedQRCodes.find((img) => img.id === id);
+    setUploadedQRCodes((prev) => prev.filter((img) => img.id !== id));
+    // If deleted image was selected, switch to first preset
+    if (imageToDelete?.url === qrCodeSrc) {
+      setQrCodeSrc(presetQRCodes[0]?.url || "");
+    }
+  }
 
   const posterProps = {
     city,
@@ -152,6 +196,10 @@ export default function Home() {
                   value={backgroundImageSrc}
                   onChange={setBackgroundImageSrc}
                   presets={presetBackgrounds}
+                  uploads={uploadedBackgrounds}
+                  onImageUploaded={handleBackgroundUploaded}
+                  onImageNameChanged={handleBackgroundNameChanged}
+                  onImageDeleted={handleBackgroundDeleted}
                   accept="image/jpeg,image/png,image/webp"
                 />
 
@@ -160,6 +208,10 @@ export default function Home() {
                   value={qrCodeSrc}
                   onChange={setQrCodeSrc}
                   presets={presetQRCodes}
+                  uploads={uploadedQRCodes}
+                  onImageUploaded={handleQRCodeUploaded}
+                  onImageNameChanged={handleQRCodeNameChanged}
+                  onImageDeleted={handleQRCodeDeleted}
                   accept="image/png,image/jpeg"
                 />
               </div>

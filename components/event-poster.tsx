@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 
 interface EventPosterProps {
   city?: string
@@ -29,7 +29,13 @@ export function EventPoster({
 }: EventPosterProps) {
   const locationLines = useMemo(() => (location ?? "").split("\n").filter(Boolean), [location])
 
+  // Track image source with fallback on error
   const [imageSrc, setImageSrc] = useState(backgroundImageSrc)
+
+  // Sync state when prop changes (e.g., user uploads new image)
+  useEffect(() => {
+    setImageSrc(backgroundImageSrc)
+  }, [backgroundImageSrc])
 
   return (
     <div
