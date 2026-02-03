@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { PosterPreview } from "@/components/poster-preview";
 import { DownloadButton } from "@/components/download-button";
+import { BannerPreview } from "@/components/banner-preview";
+import { BannerDownloadButton } from "@/components/banner-download-button";
 import { ImagePicker, ImageOption } from "@/components/image-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { presetBackgrounds, presetQRCodes } from "@/lib/preset-images";
 
+type Tab = "poster" | "banner";
+
 export default function Home() {
+  // Tab state
+  const [activeTab, setActiveTab] = useState<Tab>("poster");
+
+  // Shared event details
   const [city, setCity] = useState("Shanghai");
   const [eventName, setEventName] = useState("AI Breakfast #21");
   const [tagline, setTagline] = useState(
@@ -27,6 +35,10 @@ export default function Home() {
   );
   const [qrCodeSrc, setQrCodeSrc] = useState(presetQRCodes[0]?.url || "");
   const [showQr, setShowQr] = useState(true);
+
+  // Banner-specific state
+  const [bannerWidth, setBannerWidth] = useState(1080);
+  const [bannerHeight, setBannerHeight] = useState(640);
 
   // Track user-uploaded images
   const [uploadedBackgrounds, setUploadedBackgrounds] = useState<ImageOption[]>([]);
@@ -46,7 +58,6 @@ export default function Home() {
   function handleBackgroundDeleted(id: string) {
     const imageToDelete = uploadedBackgrounds.find((img) => img.id === id);
     setUploadedBackgrounds((prev) => prev.filter((img) => img.id !== id));
-    // If deleted image was selected, switch to first preset
     if (imageToDelete?.url === backgroundImageSrc) {
       setBackgroundImageSrc(presetBackgrounds[0]?.url || "");
     }
@@ -66,7 +77,6 @@ export default function Home() {
   function handleQRCodeDeleted(id: string) {
     const imageToDelete = uploadedQRCodes.find((img) => img.id === id);
     setUploadedQRCodes((prev) => prev.filter((img) => img.id !== id));
-    // If deleted image was selected, switch to first preset
     if (imageToDelete?.url === qrCodeSrc) {
       setQrCodeSrc(presetQRCodes[0]?.url || "");
     }
@@ -81,9 +91,27 @@ export default function Home() {
     venue,
     location,
     backgroundImageSrc,
-    // Allow empty string to explicitly render the placeholder (reserve space)
     qrCodeSrc,
     showQr,
+  };
+
+  // For banner: extract event number from event name (e.g., "AI Breakfast #21" -> "AI Breakfast" + "#21")
+  const eventNameMatch = eventName.match(/^(.+?)\s*(#\d+)?\s*$/);
+  const bannerEventName = eventNameMatch?.[1]?.trim() || eventName;
+  const bannerEventNumber = eventNameMatch?.[2] || undefined;
+  const bannerDate = `${date} | ${time}`;
+  // Short, recognizable location (city already shown in header)
+  const bannerLocation = `${venue} @ Wheelock Square`;
+
+  const bannerProps = {
+    eventName: bannerEventName,
+    eventNumber: bannerEventNumber,
+    date: bannerDate,
+    location: bannerLocation,
+    city,
+    image: backgroundImageSrc,
+    width: bannerWidth,
+    height: bannerHeight,
   };
 
   return (
@@ -95,11 +123,39 @@ export default function Home() {
             AI Breakfast Poster Generator
           </h1>
           <p className="text-muted-foreground mt-1">
-            Create and download a clean, warm poster for this week’s AI
+            Create and download clean, warm posters and banners for this week's AI
             Breakfast
           </p>
         </div>
       </header>
+
+      {/* Tabs */}
+      <div className="border-b border-border">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setActiveTab("poster")}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "poster"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Poster
+            </button>
+            <button
+              onClick={() => setActiveTab("banner")}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "banner"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Banner
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
@@ -107,9 +163,63 @@ export default function Home() {
           <div className="space-y-6 order-2 lg:order-1">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="text-xl font-semibold text-foreground">
-                Customize Your Poster
+                {activeTab === "poster" ? "Customize Your Poster" : "Customize Your Banner"}
               </h2>
 
+              {/* Banner-specific controls */}
+              {activeTab === "banner" && (
+                <div className="space-y-4 pb-4 border-b border-border">
+                  {/* Dimensions */}
+                  <div className="space-y-2">
+                    <Label>Dimensions</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={bannerWidth}
+                        onChange={(e) => setBannerWidth(parseInt(e.target.value) || 1080)}
+                        className="w-24 text-base"
+                        min={200}
+                        max={4000}
+                      />
+                      <span className="text-muted-foreground">x</span>
+                      <Input
+                        type="number"
+                        value={bannerHeight}
+                        onChange={(e) => setBannerHeight(parseInt(e.target.value) || 640)}
+                        className="w-24 text-base"
+                        min={200}
+                        max={4000}
+                      />
+                      <span className="text-muted-foreground text-sm">px</span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setBannerWidth(1080); setBannerHeight(640); }}
+                      >
+                        Huodongxing (1080x640)
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setBannerWidth(1200); setBannerHeight(630); }}
+                      >
+                        OG Image (1200x630)
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setBannerWidth(1920); setBannerHeight(1080); }}
+                      >
+                        HD (1920x1080)
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Shared event fields */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
@@ -178,18 +288,21 @@ export default function Home() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="location">Address (multiline)</Label>
-                  <Textarea
-                    id="location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder={
-                      "Address line 1\nAddress line 2\n(Optional note)"
-                    }
-                    className="text-base min-h-[120px]"
-                  />
-                </div>
+                {/* Only show address for poster */}
+                {activeTab === "poster" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Address (multiline)</Label>
+                    <Textarea
+                      id="location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder={
+                        "Address line 1\nAddress line 2\n(Optional note)"
+                      }
+                      className="text-base min-h-[120px]"
+                    />
+                  </div>
+                )}
 
                 <ImagePicker
                   label="Background Image"
@@ -203,38 +316,52 @@ export default function Home() {
                   accept="image/jpeg,image/png,image/webp"
                 />
 
-                <ImagePicker
-                  label="QR Code"
-                  value={qrCodeSrc}
-                  onChange={setQrCodeSrc}
-                  presets={presetQRCodes}
-                  uploads={uploadedQRCodes}
-                  onImageUploaded={handleQRCodeUploaded}
-                  onImageNameChanged={handleQRCodeNameChanged}
-                  onImageDeleted={handleQRCodeDeleted}
-                  accept="image/png,image/jpeg"
-                />
+                {/* QR code only for poster */}
+                {activeTab === "poster" && (
+                  <ImagePicker
+                    label="QR Code"
+                    value={qrCodeSrc}
+                    onChange={setQrCodeSrc}
+                    presets={presetQRCodes}
+                    uploads={uploadedQRCodes}
+                    onImageUploaded={handleQRCodeUploaded}
+                    onImageNameChanged={handleQRCodeNameChanged}
+                    onImageDeleted={handleQRCodeDeleted}
+                    accept="image/png,image/jpeg"
+                  />
+                )}
               </div>
             </div>
 
             {/* Download Button */}
             <div className="space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full min-h-[56px] text-lg font-semibold"
-                aria-pressed={showQr}
-                onClick={() => setShowQr((v) => !v)}
-              >
-                {showQr ? "Hide QR code" : "Show QR code"}
-              </Button>
-              <DownloadButton {...posterProps} />
+              {activeTab === "poster" && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="w-full min-h-[56px] text-lg font-semibold"
+                    aria-pressed={showQr}
+                    onClick={() => setShowQr((v) => !v)}
+                  >
+                    {showQr ? "Hide QR code" : "Show QR code"}
+                  </Button>
+                  <DownloadButton {...posterProps} />
+                </>
+              )}
+              {activeTab === "banner" && (
+                <BannerDownloadButton
+                  {...bannerProps}
+                  backgroundImageSrc={backgroundImageSrc}
+                />
+              )}
             </div>
 
             <p className="text-sm text-muted-foreground text-center">
-              Downloads as a 1080×1920px PNG image (perfect for phone viewing &
-              WeChat)
+              {activeTab === "poster"
+                ? "Downloads as a 1080×1920px PNG image (perfect for phone viewing & WeChat)"
+                : `Downloads as a ${bannerWidth}×${bannerHeight}px PNG image`}
             </p>
           </div>
 
@@ -244,7 +371,11 @@ export default function Home() {
               <h2 className="text-xl font-semibold text-foreground text-center lg:text-left">
                 Preview
               </h2>
-              <PosterPreview {...posterProps} />
+              {activeTab === "poster" ? (
+                <PosterPreview {...posterProps} />
+              ) : (
+                <BannerPreview {...bannerProps} />
+              )}
             </div>
           </div>
         </div>
