@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 
 interface BannerDownloadButtonProps {
   eventName: string
-  eventNumber?: string
   date: string
   location: string
   city: string
@@ -17,7 +16,6 @@ interface BannerDownloadButtonProps {
 
 export function BannerDownloadButton({
   eventName,
-  eventNumber,
   date,
   location,
   city,
@@ -32,7 +30,6 @@ export function BannerDownloadButton({
     try {
       const params = new URLSearchParams()
       params.set("eventName", eventName)
-      if (eventNumber) params.set("eventNumber", eventNumber)
       params.set("date", date)
       params.set("location", location)
       params.set("city", city)
@@ -52,10 +49,8 @@ export function BannerDownloadButton({
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      // Create filename from event name and number
       const safeTitle = eventName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()
-      const suffix = eventNumber ? `-${eventNumber.replace(/[^a-zA-Z0-9]/g, "")}` : ""
-      a.download = `banner-${safeTitle}${suffix}-${width}x${height}.png`
+      a.download = `banner-${safeTitle}-${width}x${height}.png`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)

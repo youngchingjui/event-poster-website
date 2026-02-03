@@ -3,7 +3,6 @@ import { NextRequest } from "next/server"
 
 export const runtime = "edge"
 
-// Helper to fetch image and convert to base64 data URL
 async function fetchImageAsDataUrl(imagePath: string, baseUrl: string): Promise<string | null> {
   try {
     const imageUrl = imagePath.startsWith("http") ? imagePath : new URL(imagePath, baseUrl).href
@@ -24,10 +23,8 @@ async function fetchImageAsDataUrl(imagePath: string, baseUrl: string): Promise<
   }
 }
 
-// Classic Banner - matches poster styling with inline styles for @vercel/og
 function ClassicBannerTemplate({
   eventName,
-  eventNumber,
   date,
   location,
   city,
@@ -35,7 +32,6 @@ function ClassicBannerTemplate({
   width,
 }: {
   eventName: string
-  eventNumber?: string
   date: string
   location: string
   city: string
@@ -43,9 +39,6 @@ function ClassicBannerTemplate({
   width: number
   height: number
 }) {
-  // Combine city and event number
-  const cityLine = eventNumber ? `${city} • ${eventNumber}` : city
-
   return (
     <div
       style={{
@@ -56,7 +49,7 @@ function ClassicBannerTemplate({
         position: "relative",
       }}
     >
-      {/* Left content - matches poster styling */}
+      {/* Left content */}
       <div
         style={{
           flex: 1,
@@ -74,7 +67,7 @@ function ClassicBannerTemplate({
             marginBottom: "28px",
           }}
         >
-          {/* City • Event Number */}
+          {/* City label */}
           <span
             style={{
               fontSize: "24px",
@@ -84,10 +77,10 @@ function ClassicBannerTemplate({
               fontFamily: "Source Serif Pro, Georgia, serif",
             }}
           >
-            {cityLine}
+            {city}
           </span>
 
-          {/* Event Name (e.g., "AI Breakfast") */}
+          {/* Event Name */}
           <h1
             style={{
               lineHeight: 0.95,
@@ -122,7 +115,7 @@ function ClassicBannerTemplate({
             {date}
           </p>
 
-          {/* Location - short and recognizable */}
+          {/* Location */}
           <p
             style={{
               fontSize: "24px",
@@ -157,7 +150,7 @@ function ClassicBannerTemplate({
             }}
           />
         )}
-        {/* Gradient overlay matching poster style */}
+        {/* Gradient overlay */}
         <div
           style={{
             position: "absolute",
@@ -177,11 +170,9 @@ function ClassicBannerTemplate({
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
-  // Get banner parameters
   const eventName = searchParams.get("eventName") || "AI Breakfast"
-  const eventNumber = searchParams.get("eventNumber") || undefined
-  const date = searchParams.get("date") || "Thursday, Jan 1 | 9:00 – 10:30 AM"
-  const location = searchParams.get("location") || "BAKER&SPICE @ Wheelock Square"
+  const date = searchParams.get("date") || "Thursday, Jan 1 | 9:00 AM"
+  const location = searchParams.get("location") || "BAKER&SPICE"
   const city = searchParams.get("city") || "Shanghai"
   const width = parseInt(searchParams.get("width") || "1080", 10)
   const height = parseInt(searchParams.get("height") || "640", 10)
@@ -192,7 +183,6 @@ export async function GET(request: NextRequest) {
 
   const baseUrl = new URL(request.url).origin
 
-  // Fetch image and font in parallel
   const [imageDataUrl, serifFontData] = await Promise.all([
     fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
     fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
@@ -205,7 +195,6 @@ export async function GET(request: NextRequest) {
       (
         <ClassicBannerTemplate
           eventName={eventName}
-          eventNumber={eventNumber}
           date={date}
           location={location}
           city={city}

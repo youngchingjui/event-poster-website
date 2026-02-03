@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PosterPreview } from "@/components/poster-preview";
 import { DownloadButton } from "@/components/download-button";
 import { BannerPreview } from "@/components/banner-preview";
@@ -12,13 +12,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { presetBackgrounds, presetQRCodes } from "@/lib/preset-images";
 
+const STORAGE_KEY = "ai-breakfast-poster-data";
+
 type Tab = "poster" | "banner";
+
+interface SavedData {
+  city: string;
+  eventName: string;
+  tagline: string;
+  date: string;
+  time: string;
+  venue: string;
+  location: string;
+  backgroundImageSrc: string;
+  qrCodeSrc: string;
+  showQr: boolean;
+  bannerWidth: number;
+  bannerHeight: number;
+}
 
 export default function Home() {
   // Tab state
   const [activeTab, setActiveTab] = useState<Tab>("poster");
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Shared event details
+  // Shared event details (defaults)
   const [city, setCity] = useState("Shanghai");
   const [eventName, setEventName] = useState("AI Breakfast #21");
   const [tagline, setTagline] = useState(
@@ -43,6 +61,71 @@ export default function Home() {
   // Track user-uploaded images
   const [uploadedBackgrounds, setUploadedBackgrounds] = useState<ImageOption[]>([]);
   const [uploadedQRCodes, setUploadedQRCodes] = useState<ImageOption[]>([]);
+
+  // Load saved data from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data: SavedData = JSON.parse(saved);
+        setCity(data.city);
+        setEventName(data.eventName);
+        setTagline(data.tagline);
+        setDate(data.date);
+        setTime(data.time);
+        setVenue(data.venue);
+        setLocation(data.location);
+        setBackgroundImageSrc(data.backgroundImageSrc);
+        setQrCodeSrc(data.qrCodeSrc);
+        setShowQr(data.showQr);
+        setBannerWidth(data.bannerWidth);
+        setBannerHeight(data.bannerHeight);
+      }
+    } catch (e) {
+      console.error("Failed to load saved data:", e);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save data to localStorage when it changes
+  useEffect(() => {
+    if (!isLoaded) return; // Don't save until initial load is complete
+
+    const data: SavedData = {
+      city,
+      eventName,
+      tagline,
+      date,
+      time,
+      venue,
+      location,
+      backgroundImageSrc,
+      qrCodeSrc,
+      showQr,
+      bannerWidth,
+      bannerHeight,
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.error("Failed to save data:", e);
+    }
+  }, [
+    isLoaded,
+    city,
+    eventName,
+    tagline,
+    date,
+    time,
+    venue,
+    location,
+    backgroundImageSrc,
+    qrCodeSrc,
+    showQr,
+    bannerWidth,
+    bannerHeight,
+  ]);
 
   // Handlers for background uploads
   function handleBackgroundUploaded(image: ImageOption) {
@@ -95,19 +178,13 @@ export default function Home() {
     showQr,
   };
 
-  // For banner: extract event number from event name (e.g., "AI Breakfast #21" -> "AI Breakfast" + "#21")
-  const eventNameMatch = eventName.match(/^(.+?)\s*(#\d+)?\s*$/);
-  const bannerEventName = eventNameMatch?.[1]?.trim() || eventName;
-  const bannerEventNumber = eventNameMatch?.[2] || undefined;
+  // Banner uses same fields, just formatted differently
   const bannerDate = `${date} | ${time}`;
-  // Short, recognizable location (city already shown in header)
-  const bannerLocation = `${venue} @ Wheelock Square`;
 
   const bannerProps = {
-    eventName: bannerEventName,
-    eventNumber: bannerEventNumber,
+    eventName,
     date: bannerDate,
-    location: bannerLocation,
+    location: venue,
     city,
     image: backgroundImageSrc,
     width: bannerWidth,

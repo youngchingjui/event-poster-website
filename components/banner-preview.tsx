@@ -5,7 +5,6 @@ import { ClassicBanner } from "./banner-templates"
 
 interface BannerPreviewProps {
   eventName: string
-  eventNumber?: string
   date: string
   location: string
   city: string
@@ -16,7 +15,6 @@ interface BannerPreviewProps {
 
 export function BannerPreview({
   eventName,
-  eventNumber,
   date,
   location,
   city,
@@ -46,7 +44,6 @@ export function BannerPreview({
         >
           <ClassicBanner
             eventName={eventName}
-            eventNumber={eventNumber}
             date={date}
             location={location}
             city={city}

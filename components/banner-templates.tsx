@@ -4,7 +4,6 @@ import { ImageWithFallback } from "./image-with-fallback"
 
 export interface BannerProps {
   eventName: string
-  eventNumber?: string
   date: string
   location: string
   city: string
@@ -15,7 +14,6 @@ export interface BannerProps {
 
 export const ClassicBanner = ({
   eventName,
-  eventNumber,
   date,
   location,
   city,
@@ -23,27 +21,24 @@ export const ClassicBanner = ({
   width = 1080,
   height = 640,
 }: BannerProps) => {
-  // Combine city and event number
-  const cityLine = eventNumber ? `${city} • ${eventNumber}` : city
-
   return (
     <div
       className="relative bg-[#F6EBDC] flex overflow-hidden"
       style={{ width: `${width}px`, height: `${height}px`, maxWidth: "100%", aspectRatio: `${width}/${height}` }}
     >
-      {/* Left content - matches poster styling */}
+      {/* Left content */}
       <div className="flex-1 p-16 flex flex-col justify-center">
         {/* Group 1: Header (City + Event Name) */}
         <div className="mb-7">
-          {/* City • Event Number */}
+          {/* City label */}
           <span
             className="text-[24px] tracking-wide block mb-2"
             style={{ color: "#6F6257", fontFamily: "ui-serif, Georgia, Times, serif" }}
           >
-            {cityLine}
+            {city}
           </span>
 
-          {/* Event Name (e.g., "AI Breakfast") */}
+          {/* Event Name */}
           <h1
             className="leading-[0.95] whitespace-nowrap"
             style={{
@@ -67,7 +62,7 @@ export const ClassicBanner = ({
             {date}
           </p>
 
-          {/* Location - short and recognizable */}
+          {/* Location */}
           <p
             className="text-[24px] tracking-wide"
             style={{ color: "#7A6B5E", fontFamily: "ui-serif, Georgia, Times, serif" }}
@@ -84,7 +79,7 @@ export const ClassicBanner = ({
           className="absolute inset-0 w-full h-full object-cover"
           alt="Banner background"
         />
-        {/* Gradient overlay matching poster style */}
+        {/* Gradient overlay */}
         <div
           className="absolute inset-0"
           style={{
