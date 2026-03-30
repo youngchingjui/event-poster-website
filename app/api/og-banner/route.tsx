@@ -3,9 +3,14 @@ import { NextRequest } from "next/server"
 
 export const runtime = "edge"
 
-async function fetchImageAsDataUrl(imagePath: string, baseUrl: string): Promise<string | null> {
+async function fetchImageAsDataUrl(
+  imagePath: string,
+  baseUrl: string
+): Promise<string | null> {
   try {
-    const imageUrl = imagePath.startsWith("http") ? imagePath : new URL(imagePath, baseUrl).href
+    const imageUrl = imagePath.startsWith("http")
+      ? imagePath
+      : new URL(imagePath, baseUrl).href
 
     const response = await fetch(imageUrl)
     if (!response.ok) {
@@ -45,7 +50,7 @@ function ClassicBannerTemplate({
         width: "100%",
         height: "100%",
         display: "flex",
-        backgroundColor: "#F6EBDC",
+        backgroundColor: "#FFFAF5",
         position: "relative",
       }}
     >
@@ -73,8 +78,8 @@ function ClassicBannerTemplate({
               fontSize: "24px",
               letterSpacing: "0.05em",
               marginBottom: "8px",
-              color: "#6F6257",
-              fontFamily: "Source Serif Pro, Georgia, serif",
+              color: "#78716C",
+              fontFamily: "Inter, sans-serif",
             }}
           >
             {city}
@@ -84,8 +89,8 @@ function ClassicBannerTemplate({
           <h1
             style={{
               lineHeight: 0.95,
-              color: "#C65B3C",
-              fontFamily: "Source Serif Pro, Georgia, serif",
+              color: "#C2410C",
+              fontFamily: "Playfair Display, Georgia, serif",
               letterSpacing: "-0.02em",
               fontSize: Math.min(110, width / 10),
               whiteSpace: "nowrap",
@@ -108,8 +113,8 @@ function ClassicBannerTemplate({
               fontSize: "36px",
               lineHeight: 1.2,
               marginBottom: "12px",
-              color: "#6F6257",
-              fontFamily: "Source Serif Pro, Georgia, serif",
+              color: "#78716C",
+              fontFamily: "Inter, sans-serif",
             }}
           >
             {date}
@@ -120,8 +125,8 @@ function ClassicBannerTemplate({
             style={{
               fontSize: "24px",
               letterSpacing: "0.05em",
-              color: "#7A6B5E",
-              fontFamily: "Source Serif Pro, Georgia, serif",
+              color: "#78716C",
+              fontFamily: "Inter, sans-serif",
             }}
           >
             {location}
@@ -158,7 +163,8 @@ function ClassicBannerTemplate({
             left: 0,
             width: "100%",
             height: "100%",
-            background: "linear-gradient(to right, rgba(246,235,220,1) 0%, rgba(246,235,220,0.65) 30%, rgba(246,235,220,0) 60%)",
+            background:
+              "linear-gradient(to right, rgba(255,250,245,1) 0%, rgba(255,250,245,0.65) 30%, rgba(255,250,245,0) 60%)",
             display: "flex",
           }}
         />
@@ -179,13 +185,21 @@ export async function GET(request: NextRequest) {
 
   const blobBaseUrl = process.env.NEXT_PUBLIC_BLOB_BASE_URL || ""
   const backgroundImageSrc =
-    searchParams.get("backgroundImageSrc") || `${blobBaseUrl}/luisa-fournier-hMjyyBqCRIs-unsplash.jpg`
+    searchParams.get("backgroundImageSrc") ||
+    `${blobBaseUrl}/luisa-fournier-hMjyyBqCRIs-unsplash.jpg`
 
   const baseUrl = new URL(request.url).origin
 
-  const [imageDataUrl, serifFontData] = await Promise.all([
+  const [imageDataUrl, displayFontData, sansFontData] = await Promise.all([
     fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
-    fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
+    fetch(
+      "https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-700-normal.ttf"
+    )
+      .then((res) => (res.ok ? res.arrayBuffer() : undefined))
+      .catch(() => undefined),
+    fetch(
+      "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf"
+    )
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
   ])
@@ -206,16 +220,28 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
-        fonts: serifFontData
-          ? [
-              {
-                name: "Source Serif Pro",
-                data: serifFontData,
-                style: "normal" as const,
-                weight: 400,
-              },
-            ]
-          : undefined,
+        fonts: [
+          ...(displayFontData
+            ? [
+                {
+                  name: "Playfair Display",
+                  data: displayFontData,
+                  style: "normal" as const,
+                  weight: 700 as const,
+                },
+              ]
+            : []),
+          ...(sansFontData
+            ? [
+                {
+                  name: "Inter",
+                  data: sansFontData,
+                  style: "normal" as const,
+                  weight: 400 as const,
+                },
+              ]
+            : []),
+        ],
       }
     )
   } catch (error) {

@@ -58,11 +58,15 @@ export async function GET(request: NextRequest) {
   const baseUrl = new URL(request.url).origin
 
   // Fetch images via URL (works on Vercel serverless)
-  const [backgroundImageDataUrl, qrCodeDataUrl, serifFontData] = await Promise.all([
+  const [backgroundImageDataUrl, qrCodeDataUrl, displayFontData, sansFontData] = await Promise.all([
     fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
     showQr ? fetchImageAsDataUrl(qrCodeSrc, baseUrl) : Promise.resolve(null),
-    // Load Source Serif Pro for better serif rendering
-    fetch("https://cdn.jsdelivr.net/fontsource/fonts/source-serif-pro@latest/latin-400-normal.ttf")
+    // Load Playfair Display for headings
+    fetch("https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-700-normal.ttf")
+      .then((res) => (res.ok ? res.arrayBuffer() : undefined))
+      .catch(() => undefined),
+    // Load Inter for body text
+    fetch("https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf")
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
   ])
@@ -76,7 +80,7 @@ export async function GET(request: NextRequest) {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            backgroundColor: "#F6EBDC",
+            backgroundColor: "#FFFAF5",
             position: "relative",
           }}
         >
@@ -115,7 +119,7 @@ export async function GET(request: NextRequest) {
               height: "100%",
               display: "flex",
               background:
-                "linear-gradient(to bottom, rgba(246,235,220,1) 0%, rgba(246,235,220,1) 46%, rgba(246,235,220,0.65) 62%, rgba(246,235,220,0) 78%)",
+                "linear-gradient(to bottom, rgba(255,250,245,1) 0%, rgba(255,250,245,1) 46%, rgba(255,250,245,0.65) 62%, rgba(255,250,245,0) 78%)",
             }}
           />
 
@@ -132,8 +136,8 @@ export async function GET(request: NextRequest) {
             <p
               style={{
                 fontSize: "34px",
-                color: "#6F6257",
-                fontFamily: "Source Serif Pro, Georgia, serif",
+                color: "#78716C",
+                fontFamily: "Inter, sans-serif",
                 letterSpacing: "0.05em",
               }}
             >
@@ -146,8 +150,8 @@ export async function GET(request: NextRequest) {
                 marginTop: "24px",
                 fontSize: "115px",
                 lineHeight: 0.95,
-                color: "#C65B3C",
-                fontFamily: "Source Serif Pro, Georgia, serif",
+                color: "#C2410C",
+                fontFamily: "Playfair Display, Georgia, serif",
                 letterSpacing: "-0.02em",
                 whiteSpace: "nowrap",
               }}
@@ -161,8 +165,8 @@ export async function GET(request: NextRequest) {
                 marginTop: "40px",
                 fontSize: "54px",
                 lineHeight: 1.2,
-                color: "#6F6257",
-                fontFamily: "Source Serif Pro, Georgia, serif",
+                color: "#292524",
+                fontFamily: "Inter, sans-serif",
               }}
             >
               {date} | {time}
@@ -174,8 +178,8 @@ export async function GET(request: NextRequest) {
                 marginTop: "24px",
                 fontSize: "34px",
                 lineHeight: 1.6,
-                color: "#7A6B5E",
-                fontFamily: "Source Serif Pro, Georgia, serif",
+                color: "#78716C",
+                fontFamily: "Inter, sans-serif",
                 maxWidth: "880px",
               }}
             >
@@ -194,8 +198,8 @@ export async function GET(request: NextRequest) {
               <p
                 style={{
                   fontSize: "34px",
-                  color: "#6F6257",
-                  fontFamily: "Source Serif Pro, Georgia, serif",
+                  color: "#292524",
+                  fontFamily: "Playfair Display, Georgia, serif",
                   letterSpacing: "0.05em",
                 }}
               >
@@ -207,8 +211,8 @@ export async function GET(request: NextRequest) {
                   style={{
                     fontSize: "30px",
                     lineHeight: 1.4,
-                    color: "#7A6B5E",
-                    fontFamily: "Source Serif Pro, Georgia, serif",
+                    color: "#78716C",
+                    fontFamily: "Inter, sans-serif",
                   }}
                 >
                   {line}
@@ -234,7 +238,7 @@ export async function GET(request: NextRequest) {
                   width: "360px",
                   height: "360px",
                   backgroundColor: "white",
-                  border: "6px solid #7B8B76",
+                  border: "6px solid #C2410C",
                   boxShadow: "0 18px 50px rgba(0,0,0,0.14)",
                   display: "flex",
                   alignItems: "center",
@@ -259,8 +263,8 @@ export async function GET(request: NextRequest) {
                 style={{
                   marginTop: "12px",
                   fontSize: "22px",
-                  color: "#6F6257",
-                  fontFamily: "Source Serif Pro, Georgia, serif",
+                  color: "#78716C",
+                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 Scan to register
@@ -272,16 +276,28 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
-        fonts: serifFontData
-          ? [
-              {
-                name: "Source Serif Pro",
-                data: serifFontData,
-                style: "normal" as const,
-                weight: 400,
-              },
-            ]
-          : undefined,
+        fonts: [
+          ...(displayFontData
+            ? [
+                {
+                  name: "Playfair Display",
+                  data: displayFontData,
+                  style: "normal" as const,
+                  weight: 700 as const,
+                },
+              ]
+            : []),
+          ...(sansFontData
+            ? [
+                {
+                  name: "Inter",
+                  data: sansFontData,
+                  style: "normal" as const,
+                  weight: 400 as const,
+                },
+              ]
+            : []),
+        ],
       }
     )
   } catch (error) {
