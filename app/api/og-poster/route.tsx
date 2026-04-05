@@ -135,10 +135,12 @@ export async function GET(request: NextRequest) {
             {/* City */}
             <p
               style={{
-                fontSize: "34px",
+                fontSize: "30px",
                 color: "#78716C",
                 fontFamily: "Inter, sans-serif",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                margin: 0,
               }}
             >
               {city}
@@ -147,9 +149,10 @@ export async function GET(request: NextRequest) {
             {/* Event name - keep on one line */}
             <h1
               style={{
-                marginTop: "24px",
+                marginTop: "12px",
+                marginBottom: 0,
                 fontSize: "115px",
-                lineHeight: 0.95,
+                lineHeight: 1,
                 color: "#C2410C",
                 fontFamily: "Playfair Display, Georgia, serif",
                 letterSpacing: "-0.02em",
@@ -159,25 +162,50 @@ export async function GET(request: NextRequest) {
               {eventName}
             </h1>
 
+            {/* Divider line */}
+            <div
+              style={{
+                marginTop: "40px",
+                width: "80px",
+                height: "3px",
+                backgroundColor: "#C2410C",
+                display: "flex",
+              }}
+            />
+
             {/* Date and time */}
             <p
               style={{
-                marginTop: "40px",
-                fontSize: "54px",
-                lineHeight: 1.2,
+                marginTop: "36px",
+                marginBottom: 0,
+                fontSize: "48px",
+                lineHeight: 1.3,
                 color: "#292524",
                 fontFamily: "Inter, sans-serif",
               }}
             >
-              {date} | {time}
+              {date}
+            </p>
+            <p
+              style={{
+                marginTop: "8px",
+                marginBottom: 0,
+                fontSize: "36px",
+                lineHeight: 1.3,
+                color: "#78716C",
+                fontFamily: "Inter, sans-serif",
+              }}
+            >
+              {time}
             </p>
 
             {/* Tagline */}
             <p
               style={{
-                marginTop: "24px",
-                fontSize: "34px",
-                lineHeight: 1.6,
+                marginTop: "32px",
+                marginBottom: 0,
+                fontSize: "32px",
+                lineHeight: 1.5,
                 color: "#78716C",
                 fontFamily: "Inter, sans-serif",
                 maxWidth: "880px",
@@ -189,10 +217,9 @@ export async function GET(request: NextRequest) {
             {/* Venue and location */}
             <div
               style={{
-                marginTop: "48px",
+                marginTop: "44px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "12px",
               }}
             >
               <p
@@ -201,23 +228,34 @@ export async function GET(request: NextRequest) {
                   color: "#292524",
                   fontFamily: "Playfair Display, Georgia, serif",
                   letterSpacing: "0.05em",
+                  margin: 0,
                 }}
               >
                 {venue}
               </p>
-              {locationLines.map((line, idx) => (
-                <p
-                  key={idx}
-                  style={{
-                    fontSize: "30px",
-                    lineHeight: 1.4,
-                    color: "#78716C",
-                    fontFamily: "Inter, sans-serif",
-                  }}
-                >
-                  {line}
-                </p>
-              ))}
+              <div
+                style={{
+                  marginTop: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                {locationLines.map((line, idx) => (
+                  <p
+                    key={idx}
+                    style={{
+                      fontSize: "28px",
+                      lineHeight: 1.5,
+                      color: "#78716C",
+                      fontFamily: "Inter, sans-serif",
+                      margin: 0,
+                    }}
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
 
