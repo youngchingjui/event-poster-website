@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=600">
+  <title>China Crossroads — Nordic Cooperation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 600px;
+      height: 960px;
+      background: #080810;
+      font-family: 'Inter', sans-serif;
+      color: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Real photo background */
+    .bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./crossroads-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    /* Dark overlay for text readability */
+    .bg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(8, 8, 16, 0.58);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Main content wrapper */
+    .content {
+      position: relative;
+      z-index: 2;
+      padding: 28px 30px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* ── TOP SECTION ── */
+    .top-section {}
+
+    .brand {
+      font-size: 46px;
+      font-weight: 900;
+      color: #C9A84C;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .brand-underline {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #C9A84C 0%, rgba(201, 168, 76, 0.2) 70%, transparent 100%);
+      margin-bottom: 14px;
+    }
+
+    .date-line {
+      font-size: 20px;
+      font-weight: 400;
+      color: #B0B0C0;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .time-line {
+      font-size: 22px;
+      font-weight: 600;
+      color: #C9A84C;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── DIVIDERS ── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, #C9A84C 0%, rgba(201, 168, 76, 0.15) 80%, transparent 100%);
+      margin: 10px 0;
+    }
+
+    /* ── TOPIC SECTION ── */
+    .section-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #D4AF5A;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .topic-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #FFFFFF;
+      line-height: 1.35;
+    }
+
+    /* ── SPEAKERS SECTION ── */
+    .speakers-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+
+    .speaker {
+      border-left: 3px solid #C9A84C;
+      padding-left: 11px;
+    }
+
+    .speaker-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.01em;
+      margin-bottom: 2px;
+    }
+
+    .speaker-title {
+      font-size: 16px;
+      font-weight: 400;
+      color: #B0B0C0;
+      line-height: 1.4;
+    }
+
+    /* ── BOTTOM SECTION ── */
+    .bottom-section {}
+
+    .supported-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .supported-text {
+      font-size: 18px;
+      font-weight: 400;
+      color: #B0B0C0;
+      line-height: 1.45;
+    }
+
+    .supported-text strong {
+      color: #FFFFFF;
+      font-weight: 600;
+      display: block;
+    }
+
+    .qr-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .qr-wrapper {
+      background: #14141E;
+      padding: 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    #qrcode {
+      display: inline-block;
+    }
+
+    .qr-text {
+      font-size: 18px;
+      color: #FFFFFF;
+      line-height: 1.55;
+    }
+
+    .qr-text strong {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .qr-text a {
+      color: #C9A84C;
+      text-decoration: none;
+    }
+
+    .venue-admission {
+      font-size: 18px;
+      color: #E0E0E0;
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+      background: rgba(0,0,0,0.45);
+      border-radius: 8px;
+      padding: 10px 16px;
+    }
+
+    .venue-admission .gold {
+      color: #C9A84C;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Photo background -->
+  <div class="bg-image"></div>
+
+  <!-- Dark readability overlay -->
+  <div class="bg-overlay"></div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- TOP: Brand + Date/Time -->
+    <div class="top-section">
+      <div class="brand">China Crossroads</div>
+      <div class="brand-underline"></div>
+      <div class="date-line">Monday, April 27th, 2026</div>
+      <div class="time-line">19:30 – 21:00</div>
+    </div>
+
+    <!-- TOPIC -->
+    <div class="mid-section">
+      <div class="divider"></div>
+      <div class="section-label">Evening Topic</div>
+      <div class="topic-title">Nordic Cooperation: Sustainability, Innovation, and Economic Growth</div>
+      <div class="divider" style="margin-top:10px;margin-bottom:10px;"></div>
+
+      <!-- SPEAKERS -->
+      <div class="section-label">Featured Speakers</div>
+      <div class="speakers-list">
+        <div class="speaker">
+          <div class="speaker-name">Anu Vuori</div>
+          <div class="speaker-title">Consul General, Finland</div>
+        </div>
+        <div class="speaker">
+          <div class="speaker-name">Jens Alsbirk</div>
+          <div class="speaker-title">Consul General, Denmark</div>
+        </div>
+        <div class="speaker">
+          <div class="speaker-name">Tobias Svenningsen</div>
+          <div class="speaker-title">Consul General, Norway</div>
+        </div>
+        <div class="speaker">
+          <div class="speaker-name">Annika Hahn-Englund</div>
+          <div class="speaker-title">Consul General, Sweden</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: Supported by + QR + Venue -->
+    <div class="bottom-section">
+      <div class="divider" style="margin-bottom:10px;margin-top:0;"></div>
+
+      <!-- Row 1 (full width): QR code left + RSVP text right -->
+      <div style="display:flex;align-items:center;gap:16px;background:rgba(0,0,0,0.45);border-radius:8px;padding:12px 16px;margin-bottom:10px;">
+        <div class="qr-wrapper" style="flex-shrink:0;">
+          <div id="qrcode"></div>
+        </div>
+        <div class="qr-text" style="flex:1;min-width:0;">
+          Scan to RSVP<br>or email&nbsp;<a href="mailto:editor@shanghai-review.org" style="white-space:nowrap;">editor@shanghai-review.org</a>
+        </div>
+      </div>
+
+      <!-- Row 2 (full width): Supported by — Finnish Consulate -->
+      <div style="display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.45);border-radius:8px;padding:12px 16px;margin-bottom:10px;">
+        <img src="https://finlandabroad.fi/o/um-theme/images/UM_merkki_sin_RGB.svg" style="width:56px;height:56px;flex-shrink:0;background:#FFFFFF;padding:6px;border-radius:6px;" alt="Finland Ministry for Foreign Affairs">
+        <div>
+          <div style="font-size:16px;letter-spacing:0.1em;color:#C9A84C;text-transform:uppercase;font-weight:600;margin-bottom:2px;">Supported by</div>
+          <div style="font-size:18px;color:#FFFFFF;line-height:1.4;font-weight:500;">Consulate General of Finland, Shanghai</div>
+        </div>
+      </div>
+
+      <div class="venue-admission">
+        Consulate General of Finland · 266 Jiangning Lu, 12F<br>
+        <span class="gold">150rmb</span> admission with drink · <span class="gold">FREE</span> for members
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script>
+    new QRCode(document.getElementById("qrcode"), {
+      text: "http://weixin.qq.com/r/RpP07PDEbK0TrbSP98ZU",
+      width: 90,
+      height: 90,
+      colorDark: "#FFFFFF",
+      colorLight: "#14141E",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  </script>
+</body>
+</html>
