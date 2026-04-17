@@ -58,15 +58,19 @@ export async function GET(request: NextRequest) {
   const baseUrl = new URL(request.url).origin
 
   // Fetch images via URL (works on Vercel serverless)
-  const [backgroundImageDataUrl, qrCodeDataUrl, displayFontData, sansFontData] = await Promise.all([
+  const [backgroundImageDataUrl, qrCodeDataUrl, displayFontData, sansFontData, sansMediumFontData] = await Promise.all([
     fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
     showQr ? fetchImageAsDataUrl(qrCodeSrc, baseUrl) : Promise.resolve(null),
-    // Load Playfair Display for headings
-    fetch("https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-700-normal.ttf")
+    // Load Fraunces for headings (modern editorial serif)
+    fetch("https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-600-normal.ttf")
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
     // Load Inter for body text
     fetch("https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf")
+      .then((res) => (res.ok ? res.arrayBuffer() : undefined))
+      .catch(() => undefined),
+    // Load Inter medium for emphasis
+    fetch("https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.ttf")
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
   ])
@@ -128,17 +132,17 @@ export async function GET(request: NextRequest) {
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "80px",
+              padding: "96px 80px 80px",
               position: "relative",
             }}
           >
             {/* City */}
             <p
               style={{
-                fontSize: "30px",
-                color: "#78716C",
+                fontSize: "28px",
+                color: "#8B7F73",
                 fontFamily: "Inter, sans-serif",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 margin: 0,
               }}
@@ -149,14 +153,15 @@ export async function GET(request: NextRequest) {
             {/* Event name - keep on one line */}
             <h1
               style={{
-                marginTop: "12px",
+                marginTop: "28px",
                 marginBottom: 0,
-                fontSize: "115px",
+                fontSize: "108px",
                 lineHeight: 1,
                 color: "#C2410C",
-                fontFamily: "Playfair Display, Georgia, serif",
-                letterSpacing: "-0.02em",
+                fontFamily: "Fraunces, Georgia, serif",
+                letterSpacing: "-0.015em",
                 whiteSpace: "nowrap",
+                fontWeight: 600,
               }}
             >
               {eventName}
@@ -165,9 +170,9 @@ export async function GET(request: NextRequest) {
             {/* Divider line */}
             <div
               style={{
-                marginTop: "40px",
-                width: "80px",
-                height: "3px",
+                marginTop: "56px",
+                width: "72px",
+                height: "2px",
                 backgroundColor: "#C2410C",
                 display: "flex",
               }}
@@ -176,24 +181,26 @@ export async function GET(request: NextRequest) {
             {/* Date and time */}
             <p
               style={{
-                marginTop: "36px",
+                marginTop: "48px",
                 marginBottom: 0,
-                fontSize: "48px",
-                lineHeight: 1.3,
+                fontSize: "46px",
+                lineHeight: 1.2,
                 color: "#292524",
                 fontFamily: "Inter, sans-serif",
+                letterSpacing: "-0.01em",
               }}
             >
               {date}
             </p>
             <p
               style={{
-                marginTop: "8px",
+                marginTop: "14px",
                 marginBottom: 0,
-                fontSize: "36px",
-                lineHeight: 1.3,
-                color: "#78716C",
+                fontSize: "34px",
+                lineHeight: 1.2,
+                color: "#8B7F73",
                 fontFamily: "Inter, sans-serif",
+                letterSpacing: "0.01em",
               }}
             >
               {time}
@@ -202,11 +209,11 @@ export async function GET(request: NextRequest) {
             {/* Tagline */}
             <p
               style={{
-                marginTop: "32px",
+                marginTop: "48px",
                 marginBottom: 0,
-                fontSize: "32px",
-                lineHeight: 1.5,
-                color: "#78716C",
+                fontSize: "30px",
+                lineHeight: 1.4,
+                color: "#6F6257",
                 fontFamily: "Inter, sans-serif",
                 maxWidth: "880px",
               }}
@@ -217,37 +224,38 @@ export async function GET(request: NextRequest) {
             {/* Venue and location */}
             <div
               style={{
-                marginTop: "44px",
+                marginTop: "72px",
                 display: "flex",
                 flexDirection: "column",
               }}
             >
               <p
                 style={{
-                  fontSize: "34px",
+                  fontSize: "32px",
                   color: "#292524",
-                  fontFamily: "Playfair Display, Georgia, serif",
-                  letterSpacing: "0.05em",
+                  fontFamily: "Fraunces, Georgia, serif",
+                  letterSpacing: "0.02em",
                   margin: 0,
+                  fontWeight: 600,
                 }}
               >
                 {venue}
               </p>
               <div
                 style={{
-                  marginTop: "16px",
+                  marginTop: "20px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "8px",
                 }}
               >
                 {locationLines.map((line, idx) => (
                   <p
                     key={idx}
                     style={{
-                      fontSize: "28px",
-                      lineHeight: 1.5,
-                      color: "#78716C",
+                      fontSize: "26px",
+                      lineHeight: 1.4,
+                      color: "#8B7F73",
                       fontFamily: "Inter, sans-serif",
                       margin: 0,
                     }}
@@ -318,10 +326,10 @@ export async function GET(request: NextRequest) {
           ...(displayFontData
             ? [
                 {
-                  name: "Playfair Display",
+                  name: "Fraunces",
                   data: displayFontData,
                   style: "normal" as const,
-                  weight: 700 as const,
+                  weight: 600 as const,
                 },
               ]
             : []),
@@ -332,6 +340,16 @@ export async function GET(request: NextRequest) {
                   data: sansFontData,
                   style: "normal" as const,
                   weight: 400 as const,
+                },
+              ]
+            : []),
+          ...(sansMediumFontData
+            ? [
+                {
+                  name: "Inter Medium",
+                  data: sansMediumFontData,
+                  style: "normal" as const,
+                  weight: 500 as const,
                 },
               ]
             : []),

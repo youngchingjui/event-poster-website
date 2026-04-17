@@ -58,7 +58,7 @@ function ClassicBannerTemplate({
       <div
         style={{
           flex: 1,
-          padding: "64px",
+          padding: "72px 64px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -69,17 +69,18 @@ function ClassicBannerTemplate({
           style={{
             display: "flex",
             flexDirection: "column",
-            marginBottom: "28px",
+            marginBottom: "40px",
           }}
         >
           {/* City label */}
           <span
             style={{
-              fontSize: "24px",
-              letterSpacing: "0.05em",
-              marginBottom: "8px",
-              color: "#78716C",
+              fontSize: "22px",
+              letterSpacing: "0.2em",
+              marginBottom: "16px",
+              color: "#8B7F73",
               fontFamily: "Inter, sans-serif",
+              textTransform: "uppercase",
             }}
           >
             {city}
@@ -90,10 +91,12 @@ function ClassicBannerTemplate({
             style={{
               lineHeight: 0.95,
               color: "#C2410C",
-              fontFamily: "Playfair Display, Georgia, serif",
-              letterSpacing: "-0.02em",
-              fontSize: Math.min(110, width / 10),
+              fontFamily: "Fraunces, Georgia, serif",
+              letterSpacing: "-0.015em",
+              fontSize: 82,
               whiteSpace: "nowrap",
+              margin: 0,
+              fontWeight: 600,
             }}
           >
             {eventName}
@@ -110,11 +113,13 @@ function ClassicBannerTemplate({
           {/* Date & Time */}
           <p
             style={{
-              fontSize: "36px",
+              fontSize: "32px",
               lineHeight: 1.2,
-              marginBottom: "12px",
-              color: "#78716C",
+              marginBottom: "16px",
+              marginTop: 0,
+              color: "#292524",
               fontFamily: "Inter, sans-serif",
+              letterSpacing: "-0.005em",
             }}
           >
             {date}
@@ -123,10 +128,11 @@ function ClassicBannerTemplate({
           {/* Location */}
           <p
             style={{
-              fontSize: "24px",
-              letterSpacing: "0.05em",
-              color: "#78716C",
+              fontSize: "22px",
+              letterSpacing: "0.02em",
+              color: "#8B7F73",
               fontFamily: "Inter, sans-serif",
+              margin: 0,
             }}
           >
             {location}
@@ -137,7 +143,7 @@ function ClassicBannerTemplate({
       {/* Right image section */}
       <div
         style={{
-          width: "40%",
+          width: "34%",
           position: "relative",
           display: "flex",
         }}
@@ -190,15 +196,20 @@ export async function GET(request: NextRequest) {
 
   const baseUrl = new URL(request.url).origin
 
-  const [imageDataUrl, displayFontData, sansFontData] = await Promise.all([
+  const [imageDataUrl, displayFontData, sansFontData, sansMediumFontData] = await Promise.all([
     fetchImageAsDataUrl(backgroundImageSrc, baseUrl),
     fetch(
-      "https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-700-normal.ttf"
+      "https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-600-normal.ttf"
     )
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
     fetch(
       "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf"
+    )
+      .then((res) => (res.ok ? res.arrayBuffer() : undefined))
+      .catch(() => undefined),
+    fetch(
+      "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.ttf"
     )
       .then((res) => (res.ok ? res.arrayBuffer() : undefined))
       .catch(() => undefined),
@@ -224,10 +235,10 @@ export async function GET(request: NextRequest) {
           ...(displayFontData
             ? [
                 {
-                  name: "Playfair Display",
+                  name: "Fraunces",
                   data: displayFontData,
                   style: "normal" as const,
-                  weight: 700 as const,
+                  weight: 600 as const,
                 },
               ]
             : []),
@@ -238,6 +249,16 @@ export async function GET(request: NextRequest) {
                   data: sansFontData,
                   style: "normal" as const,
                   weight: 400 as const,
+                },
+              ]
+            : []),
+          ...(sansMediumFontData
+            ? [
+                {
+                  name: "Inter Medium",
+                  data: sansMediumFontData,
+                  style: "normal" as const,
+                  weight: 500 as const,
                 },
               ]
             : []),
